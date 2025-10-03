@@ -1,80 +1,140 @@
-## ⚙️ script.js
-playerName=document.getElementById('playerName').value;
-document.getElementById('startScreen').classList.add('hidden');
-gameStarted=true;
-startTimestamp=performance.now();
-spawnIntervalId=setInterval(()=>{ if(!gamePaused) spawnRaindrop(); },RAINDROP_SPAWN_MS);
-requestAnimationFrame(loop);
-};
+// Elements
+const game = document.getElementById("game");
+const cloud = document.getElementById("cloud");
+const scoreDisplay = document.getElementById("score");
 
+const startScreen = document.getElementById("startScreen");
+const gameArea = document.getElementById("gameArea");
+const awarenessPage = document.getElementById("awarenessPage");
+const resultScreen = document.getElementById("resultScreen");
 
-function spawnRaindrop(){ raindrops.push({x:randInt(20,GAME_WIDTH-20),y:-10,vy:randInt(2,5)}); }
+const scenarioText = document.getElementById("scenarioText");
+const awarenessText = document.getElementById("awarenessText");
+const results = document.getElementById("results");
 
+let playerName = "";
+let happinessBefore = 0;
+let happinessAfter = 0;
+let cloudX = 170;
+let score = 0;
+let gameRunning = false;
+let timer;
+let selectedBefore = 3; 
+let selectedAfter = 3;
 
-function drawCloud(){ ctx.fillStyle='#fff'; ctx.beginPath(); ctx.arc(cloud.x,cloud.y,30,0,Math.PI*2); ctx.fill(); }
+// Simple scenarios
+const scenarios = [
+  { text: "Feeling anxious during a disaster", tip: "Take deep breaths and focus on the present moment." },
+  { text: "Feeling isolated and alone", tip: "Reach out to a friend or family member to talk." },
+  { text: "Feeling overwhelmed by news", tip: "Limit your media exposure and do something calming." }
+];
 
-
-function drawRaindrops(){ ctx.fillStyle='#7fb3d5'; raindrops.forEach(r=>{ ctx.beginPath(); ctx.arc(r.x,r.y,8,0,Math.PI*2); ctx.fill();}); }
-
-
-function update(){
-for(let i=raindrops.length-1;i>=0;i--){
-let r=raindrops[i]; r.y+=r.vy;
-if(r.y>=cloud.y-20 && r.x>=cloud.x-40 && r.x<=cloud.x+40){
-raindrops.splice(i,1);
-starsCollected++;
-document.getElementById('starsCount').textContent=starsCollected;
-handleCatch();
-}
-}
-}
-
-
-function loop(){
-if(!gameStarted)return;
-if(!gamePaused){ update(); }
-ctx.clearRect(0,0,GAME_WIDTH,GAME_HEIGHT);
-drawRaindrops(); drawCloud();
-animationId=requestAnimationFrame(loop);
-}
-
-
-function moveCloud(dx){ cloud.x=Math.max(40,Math.min(GAME_WIDTH-40,cloud.x+dx)); }
-
-
-document.getElementById('leftBtn').onclick=()=>moveCloud(-50);
-document.getElementById('rightBtn').onclick=()=>moveCloud(50);
-document.getElementById('quitBtn').onclick=()=> endGame();
-document.getElementById('restartBtn').onclick=()=>location.reload();
-
-
-function handleCatch(){
-const pair=SCENARIOS[randInt(0,SCENARIOS.length-1)];
-showPopup(`<p>${pair.s}</p><button id='next'>Next</button>`);
-document.getElementById('next').onclick=()=>{
-document.getElementById('popupPanel').innerHTML=`<p>How are you handling this stress?</p><div id='rating'></div><button id='ok'>OK</button>`;
-createStarWidget(document.getElementById('rating'),()=>{});
-document.getElementById('ok').onclick=()=>{
-document.getElementById('popupPanel').innerHTML=`<p>${pair.tip}</p><button id='close'>Close</button>`;
-document.getElementById('close').onclick=()=>closePopup();
-};
-};
+// Create star rating
+function createStarRating(containerId, callback, initial=3) {
+  const container = document.getElementById(containerId);
+  container.innerHTML = "";
+  for (let i = 1; i <= 5; i++) {
+    const span = document.createElement("span");
+    span.textContent = "★";
+    if (i <= initial) span.classList.add("selected");
+    span.addEventListener("click", () => {
+      [...container.children].forEach((s, idx) => s.classList.toggle("selected", idx < i));
+      callback(i);
+    });
+    container.appendChild(span);
+  }
 }
 
+// Initial happiness stars
+createStarRating("happinessBefore", (rating)=>{ selectedBefore = rating; }, 3);
 
-function endGame(){
-showPopup(`<p>Are you happy now?</p><div id='after'></div><button id='done'>Done</button>`);
-createStarWidget(document.getElementById('after'),(v)=>afterMood=v);
-document.getElementById('done').onclick=()=>{
-document.getElementById('popup').classList.add('hidden');
-document.getElementById('resName').textContent=playerName;
-document.getElementById('resBefore').textContent=beforeMood+"★";
-document.getElementById('resAfter').textContent=afterMood+"★";
-document.getElementById('resStars').textContent=starsCollected;
-document.getElementById('resultScreen').classList.remove('hidden');
-};
+// Start game
+function startGame() {
+  playerName = document.getElementById("playerName").value || "Player";
+  happinessBefore = selectedBefore;
+
+  startScreen.style.display = "none";
+  gameArea.style.display = "block";
+  gameRunning = true;
+
+  timer = setInterval(createRaindrop, 1500);
 }
 
+// Quit game
+function quitGame() {
+  endGame();
+}
 
-// Initialize start screen stars
-createStarWidget(document.getElementById('startStars'),(v)=>beforeMood=v);
+// End game
+function endGame() {
+  gameRunning = false;
+  clearInterval(timer);
+  gameArea.style.display = "none";
+  resultScreen.style.display = "flex";
+  createStarRating("happinessAfter", (rating)=>{ selectedAfter = rating; }, 3);
+}
+
+// Show results
+function showFinalResults() {
+  happinessAfter = selectedAfter || 3;
+  results.innerHTML = `
+    <b>Name:</b> ${playerName}<br>
+    <b>Happiness before:</b> ${happinessBefore}/5<br>
+    <b>Happiness after:</b> ${happinessAfter}/5<br>
+    <b>Stars collected:</b> ${score}
+  `;
+}
+
+// Move cloud
+document.addEventListener("keydown", (e)=>{
+  if(!gameRunning) return;
+  if(e.key === "ArrowLeft" && cloudX > 0) cloudX -= 20;
+  if(e.key === "ArrowRight" && cloudX < 340) cloudX += 20;
+  cloud.style.left = cloudX + "px";
+});
+
+// Create raindrops
+function createRaindrop() {
+  if(!gameRunning) return;
+  const raindrop = document.createElement("div");
+  raindrop.classList.add("raindrop");
+  raindrop.style.left = Math.random()*380 + "px";
+  raindrop.style.top = "0px";
+  game.appendChild(raindrop);
+
+  const fall = setInterval(()=>{
+    let top = parseInt(raindrop.style.top);
+    raindrop.style.top = (top+5) + "px";
+
+    let cloudRect = cloud.getBoundingClientRect();
+    let dropRect = raindrop.getBoundingClientRect();
+
+    if(dropRect.bottom >= cloudRect.top && dropRect.left < cloudRect.right && dropRect.right > cloudRect.left){
+      raindrop.remove();
+      clearInterval(fall);
+      score++;
+      scoreDisplay.textContent = `Stars: ${score}`;
+      showAwareness();
+    }
+
+    if(top > 480){ raindrop.remove(); clearInterval(fall); }
+  }, 30);
+}
+
+// Show awareness
+function showAwareness() {
+  gameRunning = false;
+  gameArea.style.display = "none";
+  awarenessPage.style.display = "flex";
+  const scenario = scenarios[Math.floor(Math.random()*scenarios.length)];
+  scenarioText.textContent = scenario.text;
+  awarenessText.textContent = scenario.tip;
+}
+
+// Continue game
+function continueGame() {
+  awarenessPage.style.display = "none";
+  gameArea.style.display = "block";
+  gameRunning = true;
+}
+
