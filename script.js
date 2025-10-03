@@ -1,170 +1,126 @@
-// Elements
-const game = document.getElementById("game");
-const cloud = document.getElementById("cloud");
-const scoreDisplay = document.getElementById("score");
-
-const startScreen = document.getElementById("startScreen");
-const gameArea = document.getElementById("gameArea");
-const awarenessPage = document.getElementById("awarenessPage");
-const resultScreen = document.getElementById("resultScreen");
-
-const scenarioText = document.getElementById("scenarioText");
-const awarenessText = document.getElementById("awarenessText");
-const results = document.getElementById("results");
-
+// Global Variables
 let playerName = "";
-let happinessBefore = 0;
-let happinessAfter = 0;
-let cloudX = 170;
+let initialHappiness = 0;
+let finalHappiness = 0;
 let score = 0;
-let gameRunning = false;
-let timer;
-let selectedBefore = 0;
+let cloud = { x: 350, y: 300, width: 100, height: 60 };
+const cloudSpeed = 20;
+let currentScenario = 0;
 
-// Simple scenarios with awareness
+// Sample Scenarios & Quotes
 const scenarios = [
-  { text: "You feel anxious during a disaster.", tip: "Take deep breaths and remind yourself you are safe in this moment." },
-  { text: "You are feeling isolated and alone.", tip: "Reach out to someone you trust – sharing helps lighten the load." },
-  { text: "You feel overwhelmed by constant news.", tip: "Limit your media exposure and focus on calming activities." }
+    { text: "You feel overwhelmed with work.", quote: "Take a deep breath and tackle one task at a time." },
+    { text: "Someone upset you today.", quote: "Remember, emotions pass; respond calmly." },
+    { text: "You are worried about the future.", quote: "Focus on what you can control today." }
 ];
 
-// Create star rating
-function createStarRating(containerId, callback) {
-  const container = document.getElementById(containerId);
-  container.innerHTML = "";
-  for (let i = 1; i <= 5; i++) {
-    const span = document.createElement("span");
-    span.textContent = "★";
-    span.addEventListener("click", () => {
-      [...container.children].forEach((s, idx) => {
-        s.classList.toggle("selected", idx < i);
-      });
-      callback(i);
+// --- Initial Happiness Selection ---
+const initialStars = document.querySelectorAll("#initialHappiness span");
+initialStars.forEach(star => {
+    star.addEventListener("click", () => {
+        initialHappiness = parseInt(star.dataset.value);
+        initialStars.forEach(s => s.classList.remove("selected"));
+        for (let i = 0; i < initialHappiness; i++) initialStars[i].classList.add("selected");
     });
-    container.appendChild(span);
-  }
-}
-
-// Start game
-function startGame() {
-  playerName = document.getElementById("playerName").value || "Player";
-  happinessBefore = selectedBefore || 3;
-
-  startScreen.style.display = "none";
-  gameArea.style.display = "block";
-  gameRunning = true;
-
-  timer = setInterval(createRaindrop, 2500);
-
-  // Auto end after 5 min
-  setTimeout(endGame, 5 * 60 * 1000);
-}
-
-// Quit
-function quitGame() {
-  endGame();
-}
-
-// End game
-function endGame() {
-  gameRunning = false;
-  clearInterval(timer);
-
-  happinessAfter = prompt("Rate your happiness now (1-5):") || 3;
-
-  gameArea.style.display = "none";
-  resultScreen.style.display = "block";
-
-  results.innerHTML = `
-    <b>Name:</b> ${playerName}<br>
-    <b>Happiness before:</b> ${happinessBefore}/5<br>
-    <b>Happiness after:</b> ${happinessAfter}/5<br>
-    <b>Stars collected:</b> ${score}
-  `;
-}
-
-// Move cloud
-document.addEventListener("keydown", (e) => {
-  if (!gameRunning) return;
-  if (e.key === "ArrowLeft" && cloudX > 0) {
-    cloudX -= 20;
-  } else if (e.key === "ArrowRight" && cloudX < 340) {
-    cloudX += 20;
-  }
-  cloud.style.left = cloudX + "px";
 });
 
-// Raindrops
-function createRaindrop() {
-  if (!gameRunning) return;
+// --- Handling Stars Selection ---
+const handlingStars = document.querySelectorAll("#handlingStars span");
+let handlingRating = 0;
+handlingStars.forEach(star => {
+    star.addEventListener("click", () => {
+        handlingRating = parseInt(star.dataset.value);
+        handlingStars.forEach(s => s.classList.remove("selected"));
+        for (let i = 0; i < handlingRating; i++) handlingStars[i].classList.add("selected");
+    });
+});
 
-  const raindrop = document.createElement("div");
-  raindrop.classList.add("raindrop");
-  raindrop.style.left = Math.random() * 380 + "px";
-  game.appendChild(raindrop);
-
-  let fall = setInterval(() => {
-    let top = parseInt(raindrop.style.top || 0);
-    raindrop.style.top = top + 5 + "px";
-
-    let cloudRect = cloud.getBoundingClientRect();
-    let dropRect = raindrop.getBoundingClientRect();
-
-    if (
-      dropRect.bottom >= cloudRect.top &&
-      dropRect.left < cloudRect.right &&
-      dropRect.right > cloudRect.left
-    ) {
-      raindrop.remove();
-      clearInterval(fall);
-
-      // ⭐ Add score
-      score++;
-      scoreDisplay.textContent = `Stars: ${score}`;
-
-      showAwareness();
+// --- Start Game ---
+document.getElementById("startBtn").addEventListener("click", () => {
+    playerName = document.getElementById("playerName").value || "Player";
+    if (initialHappiness === 0) {
+        alert("Please select your happiness rating!");
+        return;
     }
+    document.getElementById("startPage").style.display = "none";
+    document.getElementById("gamePage").style.display = "block";
+    drawCloud();
+});
 
-    if (top > 480) {
-      raindrop.remove();
-      clearInterval(fall);
-    }
-  }, 30);
+// --- Cloud Drawing ---
+const canvas = document.getElementById("gameCanvas");
+const ctx = canvas.getContext("2d");
+
+function drawCloud() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = "#90caf9";
+    ctx.fillRect(cloud.x, cloud.y, cloud.width, cloud.height);
 }
 
-// Show awareness scenario
-function showAwareness() {
-  gameRunning = false;
-  gameArea.style.display = "none";
-  awarenessPage.style.display = "flex";
-
-  let scenario = scenarios[Math.floor(Math.random() * scenarios.length)];
-  scenarioText.textContent = scenario.text;
-  awarenessText.textContent = scenario.tip;
-}
-
-// Continue game
-function continueGame() {
-  awarenessPage.style.display = "none";
-  gameArea.style.display = "block";
-  gameRunning = true;
-}
-
-// Setup initial star rating
-createStarRating("happinessBefore", (rating) => {
-  selectedBefore = rating;
-})
-const cloudSpeed = 20; // how much the cloud moves per click
-
+// --- Move Cloud Buttons ---
 document.getElementById("moveLeft").addEventListener("click", () => {
-  cloud.x -= cloudSpeed;
-  if (cloud.x < 0) cloud.x = 0; // prevent moving out of canvas
-  drawCloud();
+    cloud.x -= cloudSpeed;
+    if (cloud.x < 0) cloud.x = 0;
+    drawCloud();
+});
+document.getElementById("moveRight").addEventListener("click", () => {
+    cloud.x += cloudSpeed;
+    if (cloud.x > canvas.width - cloud.width) cloud.x = canvas.width - cloud.width;
+    drawCloud();
 });
 
-document.getElementById("moveRight").addEventListener("click", () => {
-  cloud.x += cloudSpeed;
-  if (cloud.x > canvas.width - cloud.width) cloud.x = canvas.width - cloud.width; // prevent moving out
-  drawCloud();
+// --- Game Logic ---
+function nextScenario() {
+    if (currentScenario >= scenarios.length) {
+        endGame();
+        return;
+    }
+    const scenario = scenarios[currentScenario];
+    document.getElementById("gamePage").style.display = "none";
+    document.getElementById("reflectionPage").style.display = "block";
+    document.getElementById("scenarioText").innerText = scenario.text;
+    document.getElementById("awarenessQuote").innerText = "";
+    handlingStars.forEach(s => s.classList.remove("selected"));
+    handlingRating = 0;
+}
+
+document.getElementById("continueBtn").addEventListener("click", () => {
+    if (handlingRating === 0) {
+        alert("Please rate how you handled this scenario!");
+        return;
+    }
+    // Add score
+    score += handlingRating;
+    document.getElementById("scoreDisplay").innerText = `Stars Collected: ${score}`;
+    document.getElementById("awarenessQuote").innerText = scenarios[currentScenario].quote;
+    currentScenario++;
+    setTimeout(() => {
+        document.getElementById("reflectionPage").style.display = "none";
+        document.getElementById("gamePage").style.display = "block";
+        nextScenario();
+    }, 2000); // Show quote for 2 sec
 });
+
+// --- End Game ---
+function endGame() {
+    document.getElementById("gamePage").style.display = "none";
+    document.getElementById("reflectionPage").style.display = "none";
+    document.getElementById("resultPage").style.display = "block";
+    document.getElementById("finalScore").innerText = `Stars Collected: ${score}`;
+    document.getElementById("initialHappinessResult").innerText = "★".repeat(initialHappiness);
+    finalHappiness = initialHappiness + Math.round(score / scenarios.length);
+    if(finalHappiness > 5) finalHappiness = 5;
+    document.getElementById("finalHappinessResult").innerText = "★".repeat(finalHappiness);
+}
+
+// --- Restart Game ---
+document.getElementById("restartBtn").addEventListener("click", () => {
+    location.reload();
+});
+
+// Start first scenario automatically after game starts
+canvas.addEventListener("click", () => {
+    nextScenario();
+});
+
 
