@@ -1,51 +1,58 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Calm Cloud – Calm in Crisis</title>
-  <link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calm Cloud Game</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <!-- Start Screen -->
-  <div id="startScreen" class="centered">
-    <h1>☁️ Calm Cloud – Calm in Crisis</h1>
-    <p>Please enter your name:</p>
-    <input type="text" id="playerName" placeholder="Your name">
-    
-    <p>Rate your happiness (1–5):</p>
-    <div id="happinessBefore" class="stars"></div>
-    
-    <button onclick="startGame()">Start Game</button>
-  </div>
-
-  <!-- Game Screen -->
-  <div id="controls" style="text-align:center; margin-top: 20px;">
-  <button id="moveLeft">⬅️ Move Left</button>
-  <button id="moveRight">➡️ Move Right</button>
-</div>
-
-  <div id="gameArea" style="display:none;">
-    <p id="instructions">Move the cloud with ⬅️ ➡️. Catch raindrops to discover awareness tips.</p>
-    <div id="game">
-      <div id="cloud"></div>
+    <div id="startPage">
+        <h1>Welcome to Calm Cloud ☁️</h1>
+        <p>Rate your happiness before starting:</p>
+        <div id="initialHappiness" class="stars">
+            <span data-value="1">★</span>
+            <span data-value="2">★</span>
+            <span data-value="3">★</span>
+            <span data-value="4">★</span>
+            <span data-value="5">★</span>
+        </div>
+        <input type="text" id="playerName" placeholder="Enter your name">
+        <button id="startBtn">Start Game</button>
     </div>
-    <div id="score">Stars: 0</div>
-    <button onclick="quitGame()">Quit</button>
-  </div>
 
-  <!-- Awareness Page -->
-  <div id="awarenessPage" style="display:none;" class="centered">
-    <h2 id="scenarioText"></h2>
-    <p id="awarenessText"></p>
-    <button onclick="continueGame()">Continue</button>
-  </div>
+    <div id="gamePage" style="display:none;">
+        <canvas id="gameCanvas" width="800" height="400"></canvas>
+        <div id="controls">
+            <button id="moveLeft">⬅️ Move Left</button>
+            <button id="moveRight">➡️ Move Right</button>
+        </div>
+        <div id="scoreDisplay">Stars Collected: 0</div>
+    </div>
 
-  <!-- Results Page -->
-  <div id="resultScreen" style="display:none;" class="centered">
-    <h2>Thank you for playing </h2>
-    <p id="results"></p>
-  </div>
+    <div id="reflectionPage" style="display:none;">
+        <p id="scenarioText"></p>
+        <p>Rate how you are handling this:</p>
+        <div id="handlingStars" class="stars">
+            <span data-value="1">★</span>
+            <span data-value="2">★</span>
+            <span data-value="3">★</span>
+            <span data-value="4">★</span>
+            <span data-value="5">★</span>
+        </div>
+        <p id="awarenessQuote"></p>
+        <button id="continueBtn">Continue</button>
+    </div>
 
-  <script src="script.js"></script>
+    <div id="resultPage" style="display:none;">
+        <h2>Game Over!</h2>
+        <p id="finalScore"></p>
+        <p>Initial Happiness: <span id="initialHappinessResult"></span></p>
+        <p>Final Happiness: <span id="finalHappinessResult"></span></p>
+        <button id="restartBtn">Play Again</button>
+    </div>
+
+    <script src="script.js"></script>
 </body>
 </html>
+
