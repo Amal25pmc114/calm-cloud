@@ -1,58 +1,66 @@
-<!DOCTYPE html>
+## 📄 index.html
+```html
+<!doctype html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Calm Cloud Game</title>
-    <link rel="stylesheet" href="style.css">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Raindrops of Calm — Minimal Game</title>
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div id="startPage">
-        <h1>Welcome to Calm Cloud ☁️</h1>
-        <p>Rate your happiness before starting:</p>
-        <div id="initialHappiness" class="stars">
-            <span data-value="1">★</span>
-            <span data-value="2">★</span>
-            <span data-value="3">★</span>
-            <span data-value="4">★</span>
-            <span data-value="5">★</span>
-        </div>
-        <input type="text" id="playerName" placeholder="Enter your name">
-        <button id="startBtn">Start Game</button>
-    </div>
+<div class="container">
 
-    <div id="gamePage" style="display:none;">
-        <canvas id="gameCanvas" width="800" height="400"></canvas>
-        <div id="controls">
-            <button id="moveLeft">⬅️ Move Left</button>
-            <button id="moveRight">➡️ Move Right</button>
-        </div>
-        <div id="scoreDisplay">Stars Collected: 0</div>
-    </div>
 
-    <div id="reflectionPage" style="display:none;">
-        <p id="scenarioText"></p>
-        <p>Rate how you are handling this:</p>
-        <div id="handlingStars" class="stars">
-            <span data-value="1">★</span>
-            <span data-value="2">★</span>
-            <span data-value="3">★</span>
-            <span data-value="4">★</span>
-            <span data-value="5">★</span>
-        </div>
-        <p id="awarenessQuote"></p>
-        <button id="continueBtn">Continue</button>
-    </div>
+<!-- Start Screen -->
+<div id="startScreen" class="overlay">
+<div class="panel">
+<div class="header">Raindrops of Calm ☁️</div>
+<p class="small">A tiny web game about noticing mood and simple coping tips during emergencies. It's calm, short and safe.</p>
 
-    <div id="resultPage" style="display:none;">
-        <h2>Game Over!</h2>
-        <p id="finalScore"></p>
-        <p>Initial Happiness: <span id="initialHappinessResult"></span></p>
-        <p>Final Happiness: <span id="finalHappinessResult"></span></p>
-        <button id="restartBtn">Play Again</button>
-    </div>
 
-    <script src="script.js"></script>
-</body>
+<div class="field">
+<label for="playerName">Your name</label>
+<input id="playerName" type="text" placeholder="e.g. Asha">
+</div>
+
+
+<div class="field">
+<label>Are you happy right now?</label>
+<div id="startStars" class="stars"></div>
+<div class="small">Choose 0–5 stars (5 = very happy).</div>
+</div>
+
+
+<div style="margin-top:12px;">
+<button id="startBtn">Start game</button>
+</div>
+</div>
+</div>
+
+
+<!-- Game Area -->
+<div id="gameContainer">
+<canvas id="gameCanvas" width="720" height="400"></canvas>
+
+
+<div id="controls">
+<div class="left-right">
+<button id="leftBtn">◀ Move Left</button>
+<button id="rightBtn">Move Right ▶</button>
+</div>
+
+
+<div style="display:flex; gap:14px; align-items:center;">
+<div id="starsCounter">Stars collected: <span id="starsCount">0</span></div>
+<div class="small" id="timeInfo">Time: 0:00</div>
+<button id="quitBtn" style="background:#ffd9d4;border-color:#ffc3be">Quit</button>
+</div>
+</div>
+</div>
+
+
+<!-- Generic Popup -->
+<div id="popup" class="overlay hidden">
+<div class="panel" id="popupPanel"></div>
 </html>
-
