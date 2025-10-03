@@ -1,42 +1,31 @@
-body {
-    font-family: Arial, sans-serif;
-    background-color: #fff3e0;
-    text-align: center;
-    margin: 0;
-    padding: 0;
-}
+## 🎨 style.css
+```css
+:root { --bg:#eaf6ff; --panel:#ffffff; --accent:#7fb3d5; --muted:#6b7f89; --soft:#dff3ff; }
+*{box-sizing:border-box}
+body{font-family:system-ui,Arial; margin:0; background:linear-gradient(#e8f7ff,#f8fcff); color:#08304b; min-height:100vh; display:flex; align-items:center; justify-content:center; padding:20px;}
+.container{width:760px; max-width:100%; position:relative;}
+#gameContainer{background:var(--soft); border-radius:12px; box-shadow:0 6px 18px rgba(4,36,60,0.08); overflow:hidden; padding:14px;}
+canvas{background:linear-gradient(#cfeefb,#dff7ff); width:100%; height:400px; display:block; border-radius:8px;}
 
-h1 {
-    color: #ff7043;
-}
 
-button {
-    padding: 10px 20px;
-    margin: 10px;
-    background-color: #ffab91;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    font-size: 16px;
-}
+#controls{display:flex; gap:10px; align-items:center; justify-content:space-between; margin-top:8px; }
+#controls .left-right{display:flex; gap:8px;}
+button{background:var(--panel); border:1px solid rgba(10,30,45,0.08); padding:8px 12px; border-radius:10px; cursor:pointer; font-weight:600;}
+button:active{transform:translateY(1px);}
 
-button:hover {
-    background-color: #ff8a65;
-}
 
-.stars span {
-    font-size: 30px;
-    cursor: pointer;
-    color: #ccc;
-}
+.overlay{position:absolute; inset:0; display:flex; align-items:center; justify-content:center; background:rgba(2,12,20,0.25); }
+.panel{background:white; padding:18px; border-radius:12px; width:min(640px,95%); box-shadow:0 8px 30px rgba(2,12,20,0.12); text-align:center;}
+.hidden{display:none;}
+.header{font-size:20px; margin-bottom:10px;}
+.field{margin:10px 0; text-align:left;}
+.field label{display:block; font-weight:600; margin-bottom:6px;}
+input[type="text"]{width:100%; padding:8px; border-radius:8px; border:1px solid #e6eef5;}
 
-.stars .selected {
-    color: gold;
-}
 
-#gameCanvas {
-    border: 2px solid #ff7043;
-    background-color: #e0f7fa;
-    margin-top: 20px;
-}
-
+.stars{display:inline-block;}
+.star{font-size:26px; cursor:pointer; margin:0 4px; color:#cdd8dc;}
+.star.filled{color:#f6b040;}
+.small{font-size:14px; color:var(--muted);}
+.results-list{text-align:left; margin-top:10px;}
+.payload{font-weight:700; color:#0b3b57;}
