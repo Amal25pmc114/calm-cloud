@@ -1,126 +1,80 @@
-// Global Variables
-let playerName = "";
-let initialHappiness = 0;
-let finalHappiness = 0;
-let score = 0;
-let cloud = { x: 350, y: 300, width: 100, height: 60 };
-const cloudSpeed = 20;
-let currentScenario = 0;
+## ⚙️ script.js
+playerName=document.getElementById('playerName').value;
+document.getElementById('startScreen').classList.add('hidden');
+gameStarted=true;
+startTimestamp=performance.now();
+spawnIntervalId=setInterval(()=>{ if(!gamePaused) spawnRaindrop(); },RAINDROP_SPAWN_MS);
+requestAnimationFrame(loop);
+};
 
-// Sample Scenarios & Quotes
-const scenarios = [
-    { text: "You feel overwhelmed with work.", quote: "Take a deep breath and tackle one task at a time." },
-    { text: "Someone upset you today.", quote: "Remember, emotions pass; respond calmly." },
-    { text: "You are worried about the future.", quote: "Focus on what you can control today." }
-];
 
-// --- Initial Happiness Selection ---
-const initialStars = document.querySelectorAll("#initialHappiness span");
-initialStars.forEach(star => {
-    star.addEventListener("click", () => {
-        initialHappiness = parseInt(star.dataset.value);
-        initialStars.forEach(s => s.classList.remove("selected"));
-        for (let i = 0; i < initialHappiness; i++) initialStars[i].classList.add("selected");
-    });
-});
+function spawnRaindrop(){ raindrops.push({x:randInt(20,GAME_WIDTH-20),y:-10,vy:randInt(2,5)}); }
 
-// --- Handling Stars Selection ---
-const handlingStars = document.querySelectorAll("#handlingStars span");
-let handlingRating = 0;
-handlingStars.forEach(star => {
-    star.addEventListener("click", () => {
-        handlingRating = parseInt(star.dataset.value);
-        handlingStars.forEach(s => s.classList.remove("selected"));
-        for (let i = 0; i < handlingRating; i++) handlingStars[i].classList.add("selected");
-    });
-});
 
-// --- Start Game ---
-document.getElementById("startBtn").addEventListener("click", () => {
-    playerName = document.getElementById("playerName").value || "Player";
-    if (initialHappiness === 0) {
-        alert("Please select your happiness rating!");
-        return;
-    }
-    document.getElementById("startPage").style.display = "none";
-    document.getElementById("gamePage").style.display = "block";
-    drawCloud();
-});
+function drawCloud(){ ctx.fillStyle='#fff'; ctx.beginPath(); ctx.arc(cloud.x,cloud.y,30,0,Math.PI*2); ctx.fill(); }
 
-// --- Cloud Drawing ---
-const canvas = document.getElementById("gameCanvas");
-const ctx = canvas.getContext("2d");
 
-function drawCloud() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    ctx.fillStyle = "#90caf9";
-    ctx.fillRect(cloud.x, cloud.y, cloud.width, cloud.height);
+function drawRaindrops(){ ctx.fillStyle='#7fb3d5'; raindrops.forEach(r=>{ ctx.beginPath(); ctx.arc(r.x,r.y,8,0,Math.PI*2); ctx.fill();}); }
+
+
+function update(){
+for(let i=raindrops.length-1;i>=0;i--){
+let r=raindrops[i]; r.y+=r.vy;
+if(r.y>=cloud.y-20 && r.x>=cloud.x-40 && r.x<=cloud.x+40){
+raindrops.splice(i,1);
+starsCollected++;
+document.getElementById('starsCount').textContent=starsCollected;
+handleCatch();
+}
+}
 }
 
-// --- Move Cloud Buttons ---
-document.getElementById("moveLeft").addEventListener("click", () => {
-    cloud.x -= cloudSpeed;
-    if (cloud.x < 0) cloud.x = 0;
-    drawCloud();
-});
-document.getElementById("moveRight").addEventListener("click", () => {
-    cloud.x += cloudSpeed;
-    if (cloud.x > canvas.width - cloud.width) cloud.x = canvas.width - cloud.width;
-    drawCloud();
-});
 
-// --- Game Logic ---
-function nextScenario() {
-    if (currentScenario >= scenarios.length) {
-        endGame();
-        return;
-    }
-    const scenario = scenarios[currentScenario];
-    document.getElementById("gamePage").style.display = "none";
-    document.getElementById("reflectionPage").style.display = "block";
-    document.getElementById("scenarioText").innerText = scenario.text;
-    document.getElementById("awarenessQuote").innerText = "";
-    handlingStars.forEach(s => s.classList.remove("selected"));
-    handlingRating = 0;
+function loop(){
+if(!gameStarted)return;
+if(!gamePaused){ update(); }
+ctx.clearRect(0,0,GAME_WIDTH,GAME_HEIGHT);
+drawRaindrops(); drawCloud();
+animationId=requestAnimationFrame(loop);
 }
 
-document.getElementById("continueBtn").addEventListener("click", () => {
-    if (handlingRating === 0) {
-        alert("Please rate how you handled this scenario!");
-        return;
-    }
-    // Add score
-    score += handlingRating;
-    document.getElementById("scoreDisplay").innerText = `Stars Collected: ${score}`;
-    document.getElementById("awarenessQuote").innerText = scenarios[currentScenario].quote;
-    currentScenario++;
-    setTimeout(() => {
-        document.getElementById("reflectionPage").style.display = "none";
-        document.getElementById("gamePage").style.display = "block";
-        nextScenario();
-    }, 2000); // Show quote for 2 sec
-});
 
-// --- End Game ---
-function endGame() {
-    document.getElementById("gamePage").style.display = "none";
-    document.getElementById("reflectionPage").style.display = "none";
-    document.getElementById("resultPage").style.display = "block";
-    document.getElementById("finalScore").innerText = `Stars Collected: ${score}`;
-    document.getElementById("initialHappinessResult").innerText = "★".repeat(initialHappiness);
-    finalHappiness = initialHappiness + Math.round(score / scenarios.length);
-    if(finalHappiness > 5) finalHappiness = 5;
-    document.getElementById("finalHappinessResult").innerText = "★".repeat(finalHappiness);
+function moveCloud(dx){ cloud.x=Math.max(40,Math.min(GAME_WIDTH-40,cloud.x+dx)); }
+
+
+document.getElementById('leftBtn').onclick=()=>moveCloud(-50);
+document.getElementById('rightBtn').onclick=()=>moveCloud(50);
+document.getElementById('quitBtn').onclick=()=> endGame();
+document.getElementById('restartBtn').onclick=()=>location.reload();
+
+
+function handleCatch(){
+const pair=SCENARIOS[randInt(0,SCENARIOS.length-1)];
+showPopup(`<p>${pair.s}</p><button id='next'>Next</button>`);
+document.getElementById('next').onclick=()=>{
+document.getElementById('popupPanel').innerHTML=`<p>How are you handling this stress?</p><div id='rating'></div><button id='ok'>OK</button>`;
+createStarWidget(document.getElementById('rating'),()=>{});
+document.getElementById('ok').onclick=()=>{
+document.getElementById('popupPanel').innerHTML=`<p>${pair.tip}</p><button id='close'>Close</button>`;
+document.getElementById('close').onclick=()=>closePopup();
+};
+};
 }
 
-// --- Restart Game ---
-document.getElementById("restartBtn").addEventListener("click", () => {
-    location.reload();
-});
 
-// Start first scenario automatically after game starts
-canvas.addEventListener("click", () => {
-    nextScenario();
-});
+function endGame(){
+showPopup(`<p>Are you happy now?</p><div id='after'></div><button id='done'>Done</button>`);
+createStarWidget(document.getElementById('after'),(v)=>afterMood=v);
+document.getElementById('done').onclick=()=>{
+document.getElementById('popup').classList.add('hidden');
+document.getElementById('resName').textContent=playerName;
+document.getElementById('resBefore').textContent=beforeMood+"★";
+document.getElementById('resAfter').textContent=afterMood+"★";
+document.getElementById('resStars').textContent=starsCollected;
+document.getElementById('resultScreen').classList.remove('hidden');
+};
+}
 
 
+// Initialize start screen stars
+createStarWidget(document.getElementById('startStars'),(v)=>beforeMood=v);
