@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Calm Cloud – Calm in Crisis</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- Start Screen -->
+  <div id="startScreen" class="centered">
+    <h1>☁️ Calm Cloud – Calm in Crisis</h1>
+    <p>Please enter your name:</p>
+    <input type="text" id="playerName" placeholder="Your name">
+    
+    <p>Rate your happiness (1–5):</p>
+    <div id="happinessBefore" class="stars"></div>
+    
+    <button onclick="startGame()">Start Game</button>
+  </div>
+
+  <!-- Game Screen -->
+  <div id="gameArea" style="display:none;">
+    <p id="instructions">Move the cloud with ⬅️ ➡️. Catch raindrops to discover awareness tips.</p>
+    <div id="game">
+      <div id="cloud"></div>
+    </div>
+    <div id="score">Stars: 0</div>
+    <button onclick="quitGame()">Quit</button>
+  </div>
+
+  <!-- Awareness Page -->
+  <div id="awarenessPage" style="display:none;" class="centered">
+    <h2 id="scenarioText"></h2>
+    <p id="awarenessText"></p>
+    <button onclick="continueGame()">Continue</button>
+  </div>
+
+  <!-- Results Page -->
+  <div id="resultScreen" style="display:none;" class="centered">
+    <h2>Thank you for playing 🌈</h2>
+    <p id="results"></p>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
