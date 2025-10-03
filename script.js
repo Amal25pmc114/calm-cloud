@@ -153,4 +153,18 @@ function continueGame() {
 // Setup initial star rating
 createStarRating("happinessBefore", (rating) => {
   selectedBefore = rating;
+})
+const cloudSpeed = 20; // how much the cloud moves per click
+
+document.getElementById("moveLeft").addEventListener("click", () => {
+  cloud.x -= cloudSpeed;
+  if (cloud.x < 0) cloud.x = 0; // prevent moving out of canvas
+  drawCloud();
 });
+
+document.getElementById("moveRight").addEventListener("click", () => {
+  cloud.x += cloudSpeed;
+  if (cloud.x > canvas.width - cloud.width) cloud.x = canvas.width - cloud.width; // prevent moving out
+  drawCloud();
+});
+
